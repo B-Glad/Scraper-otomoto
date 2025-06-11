@@ -13,7 +13,6 @@ def get_html(url):
 
 
 def show_offers(offer_links, offer_years, offer_brands, offer_mileages, offer_prices, offer_colors, offer_seats):
-
     for n in range(len(offer_links)):
         print(f"Oferta nr.{n + 1}")
         print(f"Link do oferty: {offer_links[n]}")
@@ -28,7 +27,6 @@ def show_offers(offer_links, offer_years, offer_brands, offer_mileages, offer_pr
             print(f"Kolor: {offer_colors[n]}")
         print("\n")
     print("\n \n")
-
 
 
 
