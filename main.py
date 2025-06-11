@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 import requests
 from urllib.parse import urljoin
-
+import pandas as pd
 
 if __name__ == '__main__':
     #link podstawowy
@@ -91,10 +91,6 @@ if __name__ == '__main__':
                 model_tag = offer_doc.find("p", class_="eur4qwl9 ooa-10u0vtk")
                 car_model = model_tag.get_text(strip=True)
 
-
-
-
-
         #wyświetlam wszystkie znalezione oferty
         print(f"----- Offers from page {page_number+1} -----")
         for n in range(len(offer_prices)):
@@ -106,3 +102,20 @@ if __name__ == '__main__':
             print(f"S{fuel_types[n]}")
             print(f"skrzynia biegów: {gearbox_types[n]}")
             print(f"Model: {car_model[n]}")
+
+        #Create dataset contenting all lists
+        data = {
+            'Link' : offer_links,
+            'Cena': offer_prices,
+            'Przebieg': offer_mileages,
+            'Rok produkcji': offer_years,
+            'Paliwo': fuel_types,
+            'Skrzynia biegów': gearbox_types,
+        }
+
+        #Convert the dataset to a DataFrame
+        data_frame = pd.DataFrame(data)
+        
+        #Export to excel
+        data_frame.to_excel('data.xlsx', index=False)
+
