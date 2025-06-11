@@ -1,21 +1,20 @@
 from bs4 import BeautifulSoup
 import requests
 from urllib.parse import urljoin
+import time
 
 def get_html(url):
-    # Otomoto blokuje nasz request jeżeli zrobimy go bez headera
-    headers = {
+    #Otomoto blokuje nasz request jeżeli zrobimy go bez headera
+    header = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"}
-    response = requests.get(url, headers=headers)
-
+    response = requests.get(url, headers=header)
     return BeautifulSoup(response.text, 'html.parser')
-
 
 
 
 def show_offers(offer_links, offer_years, offer_brands, offer_mileages, offer_prices, offer_colors, offer_seats):
 
-    for n in range(31):
+    for n in range(len(offer_links)):
         print(f"Oferta nr.{n + 1}")
         print(f"Link do oferty: {offer_links[n]}")
         print(f"Cena: {offer_prices[n]}")
@@ -71,7 +70,7 @@ if __name__ == '__main__':
             urljoin(otomoto_url, link) for link in all_links if "/osobowe/oferta/" in link
         ]
 
-        seen_links = set()#przechowuje raz widziane linki żeby zapobiec duplikatom
+        seen_links = set()#przechowuje raz widziane linki
         for n in range(len(offer_links_with_duplicates)):
             if offer_links_with_duplicates[n] not in seen_links:
                 offer_links.append(offer_links_with_duplicates[n])#jezeli oferta nie jest duplikatem dodajemy ja do listy offer_links
@@ -81,26 +80,21 @@ if __name__ == '__main__':
         price_tags = doc.find_all("h3", class_="efzkujb1 ooa-1d59yzt")
         offer_prices = [tag.get_text(strip=True) for tag in price_tags]
 
-        #szukamy przebiegu
         mileage_tags = doc.find_all("dd", attrs={"data-parameter": "mileage"})
         offer_mileages = [tag.get_text(strip=True) for tag in mileage_tags]
 
-        #szukamy roku produkcji
         year_tags = doc.find_all("dd", attrs={"data-parameter": "year"})
         offer_years = [tag.get_text(strip=True) for tag in year_tags]
 
-        #szukamy rodzaju paliwa
         fuel_tags = doc.find_all("dd", attrs={"data-parameter": "fuel_type"})
         fuel_types = [tag.get_text(strip=True) for tag in fuel_tags]
 
-        #szukamy rodzaju skrzyni biegow
         gearbox_tags = doc.find_all("dd", attrs={"data-parameter": "gearbox"})
         gearbox_types = [tag.get_text(strip=True) for tag in gearbox_tags]
 
-        #jezeli user chce wiecej informacji trzeba wejść na każdy offer_link i go przeszukać
         if more_informations:
             for n in range(len(offer_links)):
-                #offer_link jest n-tym linkiem z listy wszystkich linków
+                time.sleep(1)
                 #pobieramy html strony oferty[n-1]
                 offer_doc = get_html(offer_links[n])
 
@@ -113,7 +107,6 @@ if __name__ == '__main__':
                     offer_colors.append(color_tag.get_text(strip=True))
                 else:
                     offer_colors.append("NA")
-
 
                 seats_container = offer_doc.find("div", {"data-testid": "nr_seats"})
                 if seats_container:
