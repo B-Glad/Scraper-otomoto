@@ -6,24 +6,19 @@ from urllib.parse import urljoin
 if __name__ == '__main__':
     #link podstawowy
     base_url = "https://www.otomoto.pl/osobowe?search%5Border%5D=relevance_web"
-    #print("search how many pages?: ")
-    #number_of_pages= int(input())
-    print("Do you want exact informations(car model, car version, color, number of seats)? (Y/N)")
+    print("search how many pages?: ")
+    number_of_pages= int(input())
+    print("Do you want exact informations(car brand, color, number of seats)? (Y/N)")
     if(input().lower() == "y"):
         more_informations = True
     else:
         more_informations = False
 
-    number_of_pages = 1
-
     offer_links = []
-    offer_models = []
     offer_years = []
     offer_brands = []
     offer_mileages = []
     offer_prices = []
-    offer_model = []
-    offer_version = []
     offer_colors = []
     offer_seats = []
 
@@ -88,8 +83,24 @@ if __name__ == '__main__':
                 offer_response = requests.get(offer_link, headers=headers)
                 offer_doc = BeautifulSoup(offer_response.text, 'html.parser')
 
-                model_tag = offer_doc.find("p", class_="eur4qwl9 ooa-10u0vtk")
-                car_model = model_tag.get_text(strip=True)
+                brand_tag = offer_doc.find("p", class_="eur4qwl9 ooa-10u0vtk")
+                offer_brands.append(brand_tag.get_text(strip=True))
+
+                color_container = offer_doc.find("div", {"data-testid": "color"})
+                if color_container:
+                    color_tag = color_container.find("p", class_="eur4qwl9 ooa-10u0vtk")
+                    offer_colors.append(color_tag.get_text(strip=True))
+                else:
+                    offer_colors.append("NA")
+
+
+                seats_container = offer_doc.find("div", {"data-testid": "nr_seats"})
+                if seats_container:
+                    seats_tag = seats_container.find("p", class_="eur4qwl9 ooa-10u0vtk")
+                    offer_seats.append(seats_tag.get_text(strip=True))
+                else:
+                    offer_seats.append("NA")
+
 
 
 
@@ -105,4 +116,9 @@ if __name__ == '__main__':
             print(f"rok produkcji: {offer_years[n]}")
             print(f"S{fuel_types[n]}")
             print(f"skrzynia biegów: {gearbox_types[n]}")
-            print(f"Model: {car_model[n]}")
+            if more_informations:
+                print(f"Marka: {offer_brands[n]}")
+                print(f"Seats: {offer_seats[n]}")
+                print(f"color: {offer_colors[n]}")
+            print("\n")
+        print("\n \n")
