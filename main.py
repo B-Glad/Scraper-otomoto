@@ -3,13 +3,16 @@ import requests
 from urllib.parse import urljoin
 
 
-
-
 if __name__ == '__main__':
     #link podstawowy
     base_url = "https://www.otomoto.pl/osobowe?search%5Border%5D=relevance_web"
     #print("search how many pages?: ")
     #number_of_pages= int(input())
+    print("Do you want exact informations(car model, car version, color, number of seats)? (Y/N)")
+    if(input().lower() == "y"):
+        more_informations = True
+    else:
+        more_informations = False
 
     number_of_pages = 1
 
@@ -19,8 +22,10 @@ if __name__ == '__main__':
     offer_brands = []
     offer_mileages = []
     offer_prices = []
-
-
+    offer_model = []
+    offer_version = []
+    offer_colors = []
+    offer_seats = []
 
     for page_number in range(0, number_of_pages):  #for do przechodzenia między wyznaczonymi stronami OLX
         if(page_number > 0):
@@ -48,29 +53,45 @@ if __name__ == '__main__':
             urljoin(base_url, link) for link in all_links if "/osobowe/oferta/" in link
         ]
 
-        seen_links = set()
+        seen_links = set()#przechowuje raz widziane linki żeby zapobiec duplikatom
         for n in range(len(offer_links_with_duplicates)):
             if offer_links_with_duplicates[n] not in seen_links:
-                offer_links.append(offer_links_with_duplicates[n])
-                seen_links.add(offer_links_with_duplicates[n])
+                offer_links.append(offer_links_with_duplicates[n])#jezeli oferta nie jest duplikatem dodajemy ja do listy offer_links
+                seen_links.add(offer_links_with_duplicates[n])#i dodajemy ja do listy widzianych ofert
 
 
         price_tags = doc.find_all("h3", class_="efzkujb1 ooa-1d59yzt")
         offer_prices = [tag.get_text(strip=True) for tag in price_tags]
 
-        # Extract mileage
+        #szukamy przebiegu
         mileage_tags = doc.find_all("dd", attrs={"data-parameter": "mileage"})
         offer_mileages = [tag.get_text(strip=True) for tag in mileage_tags]
 
-        # Extract production year
+        #szukamy roku produkcji
         year_tags = doc.find_all("dd", attrs={"data-parameter": "year"})
         offer_years = [tag.get_text(strip=True) for tag in year_tags]
 
+        #szukamy rodzaju paliwa
         fuel_tags = doc.find_all("dd", attrs={"data-parameter": "fuel_type"})
         fuel_types = [tag.get_text(strip=True) for tag in fuel_tags]
 
+        #szukamy rodzaju skrzyni biegow
         gearbox_tags = doc.find_all("dd", attrs={"data-parameter": "gearbox"})
         gearbox_types = [tag.get_text(strip=True) for tag in gearbox_tags]
+
+        #jezeli user chce wiecej informacji trzeba wejść na każdy offer_link i go przeszukać
+        if more_informations:
+            for n in range(len(offer_links)):
+                #offer_link jest n-tym linkiem z listy wszystkich linków
+                offer_link = offer_links[n]
+                #pobieramy html strony
+                offer_response = requests.get(offer_link, headers=headers)
+                offer_doc = BeautifulSoup(offer_response.text, 'html.parser')
+
+                model_tag = offer_doc.find("p", class_="eur4qwl9 ooa-10u0vtk")
+                car_model = model_tag.get_text(strip=True)
+
+
 
 
 
@@ -84,3 +105,4 @@ if __name__ == '__main__':
             print(f"rok produkcji: {offer_years[n]}")
             print(f"S{fuel_types[n]}")
             print(f"skrzynia biegów: {gearbox_types[n]}")
+            print(f"Model: {car_model[n]}")
