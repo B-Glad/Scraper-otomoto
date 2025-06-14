@@ -3,6 +3,9 @@ import requests
 from urllib.parse import urljoin
 import time
 import pandas as pd
+from charts import create_statistics_charts
+from datetime import datetime
+import os
 
 
 def get_html(url):
@@ -154,7 +157,28 @@ if __name__ == '__main__':
 
     if all_offers:
         data_frame = pd.DataFrame(all_offers)
-        data_frame.to_excel(f'otomoto_offers.xlsx', index=False)
-        print("Dane zapisane do pliku otomoto_offers.xlsx")
+        
+        # Generate timestamp for unique filenames
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        excel_filename = f'otomoto_offers_{timestamp}.xlsx'
+        
+        try:
+            data_frame.to_excel(excel_filename, index=False)
+            print(f"Dane zapisane do pliku {excel_filename}")
+            
+            # Create and save statistics charts
+            try:
+                stats_file, fuel_file = create_statistics_charts(data_frame)
+                print(f"Wykresy statystyczne zostały zapisane jako interaktywne pliki HTML:")
+                print(f"- {stats_file}")
+                print(f"- {fuel_file}")
+                print("Otwórz te pliki w przeglądarce internetowej, aby zobaczyć interaktywne wykresy.")
+            except Exception as e:
+                print(f"Błąd podczas generowania wykresów: {str(e)}")
+                
+        except PermissionError:
+            print("Błąd: Nie można zapisać pliku Excel. Upewnij się, że plik nie jest otwarty w innym programie.")
+        except Exception as e:
+            print(f"Wystąpił nieoczekiwany błąd podczas zapisywania danych: {str(e)}")
     else:
         print("Brak ofert do zapisania.")
