@@ -1,0 +1,5 @@
+*.xlsx
+*.env
+*.png
+__pycache__/
+*.html
