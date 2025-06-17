@@ -6,7 +6,8 @@ from customtkinter import CTkOptionMenu, filedialog
 from scrapinfo import ScrapInfo
 import threading
 from threading import Event, Thread
-
+import sys
+import time
 
 def create_app() -> ScrapInfo | None:
     def button_clicked():
@@ -69,15 +70,26 @@ def create_app() -> ScrapInfo | None:
         exit()
 
 def closing_app():
+    def exit_all():
+        quit()
     customtkinter.set_appearance_mode("System")
     customtkinter.set_default_color_theme("blue")
 
     app = customtkinter.CTk()
-    app.geometry("400x50")
+    app.geometry("400x100")
     app.title("Scraper Otomoto")
 
     text = customtkinter.CTkLabel(app, text="zakonczono działanie aplikacji")
     text.pack(pady=10)
+
+    button = customtkinter.CTkButton(
+        master=app,
+        text="wyjdź",
+        fg_color="purple",
+        command=exit_all
+    )
+    button.pack(pady=10)
+
     app.mainloop()
 
 
