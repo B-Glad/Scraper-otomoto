@@ -5,7 +5,7 @@ import time
 import pandas as pd
 from charts import create_statistics_charts
 from datetime import datetime
-from GUI import create_app, create_progressbar, increase_progressbar
+from GUI import create_app
 import threading
 from threading import Event, Thread
 from scrapinfo import ScrapInfo
@@ -38,33 +38,15 @@ def show_offers(offer_links, offer_years, offer_brands, offer_mileages, offer_pr
         print("\n")
     print("\n \n")
 
-
 if __name__ == '__main__':
-
 
     scraper_info = create_app()
     print("proccesing")
 
-    loading = threading.Thread(target = create_progressbar, args = (int(scraper_info.number_of_pages), ))
-    loading.start()
-
-
-
-
     print("still processing")
-
 
     #link podstawowy
     otomoto_url = "https://www.otomoto.pl/osobowe?search%5Border%5D=relevance_web"
-    #print("ile stron przeszukać?: ")
-    #number_of_pages= int(input())
-    #print("Czy pobrać więcej informacji?(marka samochodu, kolor, ilość siedzeń)? (Y/N)")
-    #if input().lower() == "y":
-    #    more_informations = True
-    #else:
-    #    more_informations = False
-
-
     more_informations = scraper_info.more_info
     number_of_pages = scraper_info.number_of_pages
 
@@ -165,9 +147,6 @@ if __name__ == '__main__':
 
         print(f"----- Oferty ze strony {page_number+1} -----")
         show_offers(offer_links, offer_years, offer_brands, offer_mileages, offer_prices, offer_colors, offer_seats, fuel_types, gearbox_types, more_informations)
-        print("increasing progressbar: ")
-        increase_progressbar()
-        print("appending offers")
 
         for i in range(min_len):
             all_offers.append({
@@ -182,14 +161,12 @@ if __name__ == '__main__':
                 'Skrzynia biegów': gearbox_types[i],
             })
 
-        print("offers appended")
-
     if all_offers:
         data_frame = pd.DataFrame(all_offers)
         
         # Generate timestamp for unique filenames
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        excel_filename = f'otomoto_offers_{timestamp}.xlsx'
+        excel_filename = os.path.join(scraper_info.save_path, f'otomoto_offers_{timestamp}.xlsx')
         
         try:
             data_frame.to_excel(excel_filename, index=False)
@@ -197,7 +174,7 @@ if __name__ == '__main__':
             
             # Create and save statistics charts
             try:
-                stats_file, fuel_file = create_statistics_charts(data_frame)
+                stats_file, fuel_file = create_statistics_charts(data_frame, scraper_info.save_path)
                 print(f"Wykresy statystyczne zostały zapisane jako interaktywne pliki HTML:")
                 print(f"- {stats_file}")
                 print(f"- {fuel_file}")

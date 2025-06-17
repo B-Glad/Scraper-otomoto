@@ -13,8 +13,9 @@ def clean_mileage(mileage_str):
     # Remove 'km' and convert to float
     return float(re.sub(r'[^\d]', '', mileage_str))
 
-def create_statistics_charts(df):
+def create_statistics_charts(df, save_path):
     # Generate timestamp for unique filenames
+    import os
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     
     try:
@@ -85,7 +86,7 @@ def create_statistics_charts(df):
         )
         
         # Save the main chart
-        stats_chart_filename = f'statistics_charts_{timestamp}.html'
+        stats_chart_filename = os.path.join(save_path, f'statistics_charts_{timestamp}.html')
         fig.write_html(stats_chart_filename)
         
         # Create fuel type distribution pie chart
@@ -97,7 +98,7 @@ def create_statistics_charts(df):
         )
         
         # Save the fuel distribution chart
-        fuel_chart_filename = f'fuel_distribution_{timestamp}.html'
+        fuel_chart_filename = os.path.join(save_path, f'fuel_distribution_{timestamp}.html')
         fig_fuel.write_html(fuel_chart_filename)
         
         return stats_chart_filename, fuel_chart_filename
