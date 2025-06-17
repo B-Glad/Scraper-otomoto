@@ -5,7 +5,9 @@ import time
 import pandas as pd
 from charts import create_statistics_charts
 from datetime import datetime
-from GUI import create_app
+from GUI import create_app, create_progressbar, increase_progressbar
+import threading
+from threading import Event, Thread
 from scrapinfo import ScrapInfo
 import os
 
@@ -43,7 +45,13 @@ if __name__ == '__main__':
     scraper_info = create_app()
     print("proccesing")
 
+    loading = threading.Thread(target = create_progressbar, args = (int(scraper_info.number_of_pages), ))
+    loading.start()
 
+
+
+
+    print("still processing")
 
 
     #link podstawowy
@@ -157,6 +165,9 @@ if __name__ == '__main__':
 
         print(f"----- Oferty ze strony {page_number+1} -----")
         show_offers(offer_links, offer_years, offer_brands, offer_mileages, offer_prices, offer_colors, offer_seats, fuel_types, gearbox_types, more_informations)
+        print("increasing progressbar: ")
+        increase_progressbar()
+        print("appending offers")
 
         for i in range(min_len):
             all_offers.append({
@@ -171,7 +182,7 @@ if __name__ == '__main__':
                 'Skrzynia biegów': gearbox_types[i],
             })
 
-
+        print("offers appended")
 
     if all_offers:
         data_frame = pd.DataFrame(all_offers)
