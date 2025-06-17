@@ -15,11 +15,14 @@ def create_app() -> ScrapInfo | None:
     def button_clicked():
         nonlocal clicked
         clicked = True
-        print("mejbe")
+        print("button clicked")
         app.quit()
+
 
     def increase(value):
         slider_label.configure(text=int(value))
+
+
 
     customtkinter.set_appearance_mode("System")
     customtkinter.set_default_color_theme("blue")
@@ -64,13 +67,12 @@ def create_app() -> ScrapInfo | None:
     pages = int(slider.get())
 
     if clicked:
-        print("Clicked")
+        print("creating an object")
         scrape_info = ScrapInfo(more_info, pages, filename)
+        print(scrape_info.more_info)
+        print(scrape_info.number_of_pages)
 
 
-        slider_label.destroy()
-        optionmenu.destroy()
-        slider.destroy()
 
         return scrape_info
     else:
