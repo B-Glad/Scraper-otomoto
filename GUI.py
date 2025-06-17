@@ -68,37 +68,17 @@ def create_app() -> ScrapInfo | None:
         print("błąd działania GUI aplikacji")
         exit()
 
-global finished_scraping
-def create_progressbar(size):
-
+def closing_app():
     customtkinter.set_appearance_mode("System")
     customtkinter.set_default_color_theme("blue")
 
+    app = customtkinter.CTk()
+    app.geometry("400x50")
+    app.title("Scraper Otomoto")
 
-    progress_app = customtkinter.CTk()
-    progress_app.geometry("750x500")
-    progress_app.title("Scraper Otomoto")
+    text = customtkinter.CTkLabel(app, text="zakonczono działanie aplikacji")
+    text.pack(pady=10)
+    app.mainloop()
 
-    global progressbar, progress_label
-    progressbar = customtkinter.CTkProgressBar(master = progress_app, determinate_speed = 50/size)
-    progressbar.pack(pady=10)
-    progressbar.set(0)
-
-
-    progress_label = customtkinter.CTkLabel(master = progress_app, text = "0%")
-    progress_label.pack(pady=10)
-
-    progress_app.mainloop()
-
-
-def increase_progressbar():
-    finished_scraping = False
-    last_progress = progressbar.get()
-    progressbar.step()
-    progress_label.configure(text=(round(progressbar.get(), 2)*100, "%"))
-    if(progressbar.get()==1 or last_progress > progressbar.get()):
-        progress_label.configure(text="Zakończono")
-        sleep(2)
-        exit()
 
 
