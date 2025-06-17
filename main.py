@@ -5,7 +5,11 @@ import time
 import pandas as pd
 from charts import create_statistics_charts
 from datetime import datetime
+from GUI import create_app
+from scrapinfo import ScrapInfo
 import os
+
+
 
 
 def get_html(url):
@@ -34,15 +38,27 @@ def show_offers(offer_links, offer_years, offer_brands, offer_mileages, offer_pr
 
 
 if __name__ == '__main__':
+
+
+    scraper_info = create_app()
+    print("proccesing")
+
+
+
+
     #link podstawowy
     otomoto_url = "https://www.otomoto.pl/osobowe?search%5Border%5D=relevance_web"
-    print("ile stron przeszukać?: ")
-    number_of_pages= int(input())
-    print("Czy pobrać więcej informacji?(marka samochodu, kolor, ilość siedzeń)? (Y/N)")
-    if input().lower() == "y":
-        more_informations = True
-    else:
-        more_informations = False
+    #print("ile stron przeszukać?: ")
+    #number_of_pages= int(input())
+    #print("Czy pobrać więcej informacji?(marka samochodu, kolor, ilość siedzeń)? (Y/N)")
+    #if input().lower() == "y":
+    #    more_informations = True
+    #else:
+    #    more_informations = False
+
+
+    more_informations = scraper_info.more_info
+    number_of_pages = scraper_info.number_of_pages
 
     all_offers = []  # List to accumulate all offers as dicts
 
@@ -139,7 +155,7 @@ if __name__ == '__main__':
         fuel_types = fuel_types[:min_len]
         gearbox_types = gearbox_types[:min_len]
 
-        print(f"----- Offers from page {page_number+1} -----")
+        print(f"----- Oferty ze strony {page_number+1} -----")
         show_offers(offer_links, offer_years, offer_brands, offer_mileages, offer_prices, offer_colors, offer_seats, fuel_types, gearbox_types, more_informations)
 
         for i in range(min_len):
@@ -154,6 +170,8 @@ if __name__ == '__main__':
                 'Rodzaj paliwa': fuel_types[i],
                 'Skrzynia biegów': gearbox_types[i],
             })
+
+
 
     if all_offers:
         data_frame = pd.DataFrame(all_offers)
