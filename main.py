@@ -6,23 +6,20 @@ import pandas as pd
 from charts import create_statistics_charts
 from datetime import datetime
 from GUI import create_app, closing_app
-import threading
-from threading import Event, Thread
 from scrapinfo import ScrapInfo
 import os
 
 
-
-
 def get_html(url):
-    #Otomoto blokuje nasz request jeżeli zrobimy go bez headera
+    # Otomoto blokuje nasz request jeżeli zrobimy go bez headera
     header = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"}
     response = requests.get(url, headers=header)
     return BeautifulSoup(response.text, 'html.parser')
 
 
-def show_offers(offer_links, offer_years, offer_brands, offer_mileages, offer_prices, offer_colors, offer_seats, fuel_types, gearbox_types, more_informations):
+def show_offers(offer_links, offer_years, offer_brands, offer_mileages, offer_prices, offer_colors, offer_seats,
+                fuel_types, gearbox_types, more_informations):
     for n in range(len(offer_links)):
         print(f"Oferta nr.{n + 1}")
         print(f"Link do oferty: {offer_links[n]}")
@@ -41,22 +38,13 @@ def show_offers(offer_links, offer_years, offer_brands, offer_mileages, offer_pr
 
 if __name__ == '__main__':
 
-
     scraper_info = create_app()
+    print("proccesing")
+
     print("still processing")
 
-
-    #link podstawowy
+    # link podstawowy
     otomoto_url = "https://www.otomoto.pl/osobowe?search%5Border%5D=relevance_web"
-    #print("ile stron przeszukać?: ")
-    #number_of_pages= int(input())
-    #print("Czy pobrać więcej informacji?(marka samochodu, kolor, ilość siedzeń)? (Y/N)")
-    #if input().lower() == "y":
-    #    more_informations = True
-    #else:
-    #    more_informations = False
-
-
     more_informations = scraper_info.more_info
     number_of_pages = scraper_info.number_of_pages
 
@@ -74,9 +62,9 @@ if __name__ == '__main__':
         gearbox_types = []
 
         url = ""
-        if(page_number > 0):
+        if (page_number > 0):
             url = f"{otomoto_url}&page={page_number}"
-        elif(page_number == 0):
+        elif (page_number == 0):
             url = otomoto_url
 
         doc = get_html(url)
@@ -144,7 +132,8 @@ if __name__ == '__main__':
             offer_seats = ["NA"] * len(offer_links)
 
         # Ensure all lists are the same length
-        min_len = min(len(offer_links), len(offer_years), len(offer_brands), len(offer_mileages), len(offer_prices), len(offer_colors), len(offer_seats), len(fuel_types), len(gearbox_types))
+        min_len = min(len(offer_links), len(offer_years), len(offer_brands), len(offer_mileages), len(offer_prices),
+                      len(offer_colors), len(offer_seats), len(fuel_types), len(gearbox_types))
         offer_links = offer_links[:min_len]
         offer_years = offer_years[:min_len]
         offer_brands = offer_brands[:min_len]
@@ -155,9 +144,9 @@ if __name__ == '__main__':
         fuel_types = fuel_types[:min_len]
         gearbox_types = gearbox_types[:min_len]
 
-        print(f"----- Oferty ze strony {page_number+1} -----")
-        show_offers(offer_links, offer_years, offer_brands, offer_mileages, offer_prices, offer_colors, offer_seats, fuel_types, gearbox_types, more_informations)
-
+        print(f"----- Oferty ze strony {page_number + 1} -----")
+        show_offers(offer_links, offer_years, offer_brands, offer_mileages, offer_prices, offer_colors, offer_seats,
+                    fuel_types, gearbox_types, more_informations)
 
         for i in range(min_len):
             all_offers.append({
@@ -172,29 +161,28 @@ if __name__ == '__main__':
                 'Skrzynia biegów': gearbox_types[i],
             })
 
-        print("offers appended")
-
     if all_offers:
         data_frame = pd.DataFrame(all_offers)
-        
+
         # Generate timestamp for unique filenames
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        excel_filename = f'otomoto_offers_{timestamp}.xlsx'
-        
+        excel_filename = os.path.join(scraper_info.save_path, f'otomoto_offers_{timestamp}.xlsx')
+
         try:
             data_frame.to_excel(excel_filename, index=False)
             print(f"Dane zapisane do pliku {excel_filename}")
-            
+
             # Create and save statistics charts
             try:
-                stats_file, fuel_file = create_statistics_charts(data_frame)
+                closing_app(excel_filename)
+                stats_file, fuel_file = create_statistics_charts(data_frame, scraper_info.save_path)
                 print(f"Wykresy statystyczne zostały zapisane jako interaktywne pliki HTML:")
                 print(f"- {stats_file}")
                 print(f"- {fuel_file}")
                 print("Otwórz te pliki w przeglądarce internetowej, aby zobaczyć interaktywne wykresy.")
             except Exception as e:
                 print(f"Błąd podczas generowania wykresów: {str(e)}")
-                
+
         except PermissionError:
             print("Błąd: Nie można zapisać pliku Excel. Upewnij się, że plik nie jest otwarty w innym programie.")
         except Exception as e:
@@ -202,4 +190,3 @@ if __name__ == '__main__':
     else:
         print("Brak ofert do zapisania.")
 
-    closing_app()
