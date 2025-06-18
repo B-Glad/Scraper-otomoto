@@ -2,11 +2,11 @@ from pydoc import describe
 from time import sleep
 
 import customtkinter
-from customtkinter import CTkOptionMenu, filedialog
+from customtkinter import CTkOptionMenu, filedialog, CTkProgressBar
 from scrapinfo import ScrapInfo
 import threading
 from threading import Event, Thread
-
+import os
 
 def create_app() -> ScrapInfo | None:
     def button_clicked():
@@ -19,7 +19,15 @@ def create_app() -> ScrapInfo | None:
     def increase(value):
         slider_label.configure(text=int(value))
 
-
+    def choose_folder():
+        nonlocal save_path
+        selected = filedialog.askdirectory(title="Wybierz folder zapisu wykresów")
+        if selected:
+            save_path = selected
+            folder_label.configure(text=f"📁 {selected}")
+        else:
+            save_path = None
+            folder_label.configure(text="❌ Nie wybrano folderu")
 
     customtkinter.set_appearance_mode("System")
     customtkinter.set_default_color_theme("blue")
@@ -29,6 +37,7 @@ def create_app() -> ScrapInfo | None:
     app.title("Scraper Otomoto")
 
     clicked = False
+    save_path = None 
 
     text = customtkinter.CTkLabel(app, text="Czy wyświetlić dodatkowe informacje?:")
     text.pack(pady=10)
@@ -42,6 +51,13 @@ def create_app() -> ScrapInfo | None:
 
     slider_label = customtkinter.CTkLabel(master=app, text="15", font=("Helvetica", 12))
     slider_label.pack(pady=10)
+
+    # Przycisk wyboru folderu
+    folder_button = customtkinter.CTkButton(app, text="Wybierz folder zapisu", command=choose_folder)
+    folder_button.pack(pady=10)
+
+    folder_label = customtkinter.CTkLabel(app, text="Nie wybrano folderu")
+    folder_label.pack(pady=5)
 
     button = customtkinter.CTkButton(
         master=app,
@@ -58,9 +74,10 @@ def create_app() -> ScrapInfo | None:
 
     if clicked:
         print("creating an object")
-        scrape_info = ScrapInfo(more_info, pages)
+        scrape_info = ScrapInfo(more_info, pages, save_path)
         print(scrape_info.more_info)
         print(scrape_info.number_of_pages)
+        scrape_info.save_path = save_path  # dodajemy atrybut ścieżki zapisu
         app.quit()
         app.destroy()
         return scrape_info
@@ -69,36 +86,4 @@ def create_app() -> ScrapInfo | None:
         exit()
 
 global finished_scraping
-def create_progressbar(size):
-
-    customtkinter.set_appearance_mode("System")
-    customtkinter.set_default_color_theme("blue")
-
-
-    progress_app = customtkinter.CTk()
-    progress_app.geometry("750x500")
-    progress_app.title("Scraper Otomoto")
-
-    global progressbar, progress_label
-    progressbar = customtkinter.CTkProgressBar(master = progress_app, determinate_speed = 50/size)
-    progressbar.pack(pady=10)
-    progressbar.set(0)
-
-
-    progress_label = customtkinter.CTkLabel(master = progress_app, text = "0%")
-    progress_label.pack(pady=10)
-
-    progress_app.mainloop()
-
-
-def increase_progressbar():
-    finished_scraping = False
-    last_progress = progressbar.get()
-    progressbar.step()
-    progress_label.configure(text=(round(progressbar.get(), 2)*100, "%"))
-    if(progressbar.get()==1 or last_progress > progressbar.get()):
-        progress_label.configure(text="Zakończono")
-        sleep(2)
-        exit()
-
 
