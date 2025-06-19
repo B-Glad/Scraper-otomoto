@@ -1,13 +1,10 @@
 from bs4 import BeautifulSoup
 import requests
 from urllib.parse import urljoin
-import time
 import pandas as pd
 from charts import create_statistics_charts
 from datetime import datetime
-from GUI import create_app
-import threading
-from threading import Event, Thread
+from GUI import create_app, closing_app
 from scrapinfo import ScrapInfo
 import os
 
@@ -171,6 +168,7 @@ if __name__ == '__main__':
         try:
             data_frame.to_excel(excel_filename, index=False)
             print(f"Dane zapisane do pliku {excel_filename}")
+            closing_app(excel_filename)
             
             # Create and save statistics charts
             try:

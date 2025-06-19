@@ -1,12 +1,6 @@
-from pydoc import describe
-from time import sleep
-
 import customtkinter
 from customtkinter import CTkOptionMenu, filedialog, CTkProgressBar
 from scrapinfo import ScrapInfo
-import threading
-from threading import Event, Thread
-import os
 
 def create_app() -> ScrapInfo | None:
     def button_clicked():
@@ -85,5 +79,27 @@ def create_app() -> ScrapInfo | None:
         print("błąd działania GUI aplikacji")
         exit()
 
-global finished_scraping
+
+def closing_app(excel_filse_name):
+    def exit_all():
+        quit()
+    customtkinter.set_appearance_mode("System")
+    customtkinter.set_default_color_theme("blue")
+
+    app = customtkinter.CTk()
+    app.geometry("800x200")
+    app.title("Scraper Otomoto")
+
+    text = customtkinter.CTkLabel(app, text=f"Zakonczono działanie aplikacji. \n We wskazanym folderze utworzono nowy plik excel: {excel_filse_name}")
+    text.pack(pady=10)
+
+    button = customtkinter.CTkButton(
+        master=app,
+        text="wyjdź",
+        fg_color="purple",
+        command=exit_all
+    )
+    button.pack(pady=10)
+
+    app.mainloop()
 
